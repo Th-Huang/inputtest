@@ -13,6 +13,19 @@ class GNNAttention(torch.nn.Module):
         self.conv1 = CGConv(dim, aggr='max', batch_norm=True).cuda()
         self.conv2 = CGConv(dim, aggr='max', batch_norm=True).cuda()
 
+    def forward(self, input_xyz, coord_xyz, coord_f):
+        b, ninput, d = input_xyz.shape
+        batch_idx = torch.arange(b).repeat_interleave(ninput).to(input_xyz.device)
+        f0 =coord_f.reshape(-1, d)
+
+        edge_idx_input = knn_graph(input_xyz(-1,3), k=self.k, batch=batch_idx)
+        
+
+
+
+
+
+    '''
     def forward(self, xyz0, xyz1, f0, f1):
         b, npts, d = f0.shape
         batch_idx = torch.arange(b).repeat_interleave(npts).to(xyz0.device)
@@ -38,3 +51,4 @@ class GNNAttention(torch.nn.Module):
         f1 = f1.reshape(b, npts, d)
 
         return f0, f1
+        '''
