@@ -17,14 +17,7 @@ class _PointnetSAModuleBase(nn.Module):
         self.pool_method = 'max_pool'
 
     def forward(self, xyz: torch.Tensor, features: torch.Tensor = None, new_xyz=None) -> (torch.Tensor, torch.Tensor):
-        """
-        :param xyz: (B, N, 3) tensor of the xyz coordinates of the features
-        :param features: (B, C, N) tensor of the descriptors of the the features
-        :param new_xyz:
-        :return:
-            new_xyz: (B, npoint, 3) tensor of the new features' xyz
-            new_features: (B, npoint, \sum_k(mlps[k][-1])) tensor of the new_features descriptors
-        """
+
         new_features_list = []
 
         xyz_flipped = xyz.transpose(1, 2).contiguous()
@@ -154,6 +147,51 @@ class PointnetFPModule(nn.Module):
         new_features = self.mlp(new_features)
 
         return new_features.squeeze(-1)
+
+class PointNetFeaturePropagation(nn.Module):
+    def __init__(self, in_channels, mlp):
+        super(PointNetFeaturePropagation, self).__init__()
+        self.mlp_convs = nn.ModuleList()
+        self.mlp_bns = nn.ModuleList()
+        last_channel = in_channels
+        for out_channels in mlp:
+            self.mlp_convs.append(nn.Conv1d(last_channel, out_channels, 1))
+            self.mlp_bns.append(nn.BatchNorm1d(out_channels))
+            last_channel = out_channels
+
+    def forward(self, xyz1, xyz2, points1, points2):
+
+        points2 = points2.permute(0, 2, 1)
+
+        B, N, C = xyz1.shape
+        _, S, _ = xyz2.shape
+
+        if S == 1:
+            interpolated_points = points2.repeat(1, N, 1)
+        else:
+            dists = pointnet2_utils.square_distance(xyz1, xyz2)
+            dists, idx = dists.sort(dim=-1)
+            dists, idx = dists[:, :, :3], idx[:, :, :3]
+
+            dist_recip = 1.0 / (dists + 1e-8)
+            norm = torch.sum(dist_recip, dim=2, keepdim=True)
+            weight = dist_recip / norm
+            interpolated_points = torch.sum(pointnet2_utils.index_points(points2, idx) * weight.view(B, N, 3, 1), dim=2)
+
+        if points1 is not None:
+            points1 = points1.permute(0, 2, 1)
+            new_points = torch.cat([points1, interpolated_points], dim=-1)
+        else:
+            new_points = interpolated_points
+
+        new_points = new_points.permute(0, 2, 1)
+        for i, conv in enumerate(self.mlp_convs):
+            bn = self.mlp_bns[i]
+            new_points = F.relu(bn(conv(new_points)))
+        return new_points
+
+
+
 
 
 if __name__ == "__main__":
