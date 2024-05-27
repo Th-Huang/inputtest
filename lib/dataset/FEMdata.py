@@ -3,6 +3,8 @@ import numpy as np
 import os
 import re
 
+from h5py import Dataset
+
 
 def read_data(file_path):
     """Read data from a single file."""
@@ -52,3 +54,15 @@ def split_data(data_tensors):
 def repeat_tensor_elements(tensor, times):
     new_tensor = [tensor]*times
     return new_tensor
+
+class CustomDataset(Dataset):
+    def __init__(self, input_data, coord_data, output_data):
+        self.input_data = input_data
+        self.output_data = output_data
+        self.coord_data = coord_data
+
+    def __len__(self):
+        return len(self.input_data)
+
+    def __getitem__(self, index):
+        return self.input_data[index], self.coord_data[index], self.output_data[index]
