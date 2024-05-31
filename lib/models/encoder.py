@@ -9,10 +9,10 @@ class Encoder(torch.nn.Module):
         super().__init__()
 
         #for SA modules, the first element of the mlp should be the number of input features (ignoring the xyz, which is added automatically). For the following SA modules, the number of input features is computed as the sum (from concatenation) of the features from the previous level (last index)
-        self.sa1 = PointnetSAModuleMSG(npoint=1000, radii=[1.6], nsamples=[48], mlps=[[0,16,32,64]]) #Output features dim: 64
-        self.sa2 = PointnetSAModuleMSG(npoint=800, radii=[3.2], nsamples=[32], mlps=[[64,64,64]])     #Output features dim: 64
-        self.sa3 = PointnetSAModuleMSG(npoint=500, radii=[6.4], nsamples=[32], mlps=[[64,128,128]]) #Output features dim: 128
-        self.sa4 = PointnetSAModuleMSG(npoint=250, radii=[10], nsamples=[16], mlps=[[128,128,256,256]]) #Output features dim: 256
+        self.sa1 = PointnetSAModuleMSG(npoint=6000, radii=[1.6], nsamples=[48], mlps=[[0,16,32,64]]) #Output features dim: 64
+        self.sa2 = PointnetSAModuleMSG(npoint=2048, radii=[3.2], nsamples=[32], mlps=[[64,64,64]])     #Output features dim: 64
+        self.sa3 = PointnetSAModuleMSG(npoint=512, radii=[6.4], nsamples=[32], mlps=[[64,128,128]]) #Output features dim: 128
+        self.sa4 = PointnetSAModuleMSG(npoint=256, radii=[10], nsamples=[16], mlps=[[128,128,256,256]]) #Output features dim: 256
 
         self.fp1 = PointnetFPModule(mlp=[256+128,256,128]) #Propagates from sa4 to sa3
 

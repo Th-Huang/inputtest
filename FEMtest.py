@@ -43,13 +43,16 @@ def train(args):
     input_data = load_data_from_directory(config.INPUT_PATH,needsorted=True)
     coord_data = load_data_from_directory(config.COORD_PATH,needsorted=False)
     output_data = load_data_from_directory(config.OUTPUT_PATH,needsorted=True)
-    new_coord_data = [repeat_tensor_elements(tensor, 100) for tensor in coord_data][0]
-
+    new_coord_data = [repeat_tensor_elements(tensor, 150) for tensor in coord_data][0]
+    num = 0
     for i in range (len(output_data)):
         for j in range(len(output_data[i])):
             for k in range(len(output_data[i][j])):
                 if output_data[i][j][k] > 1e5 or output_data[i][j][k] < -1e5:
                     output_data[i][j][k] = 0
+                    num +=1
+
+    print('num =', num)
 
 
     input_data = torch.Tensor(input_data)
