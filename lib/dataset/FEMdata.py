@@ -11,7 +11,13 @@ def read_data(file_path):
     data = np.loadtxt(file_path, delimiter=',')
     return data
 
+def read_data1(file_path):
+    """Read data from a single file."""
+    data = np.loadtxt(file_path, delimiter=' ')
+    return data
+
 '''
+
 
 def read_data(file_path):
     return np.loadtxt(file_path, delimiter=',')
@@ -41,6 +47,28 @@ def load_data_from_directory(directory_path,needsorted):
             #tensor = torch.tensor(data, dtype=torch.float32)
             data_list.append(data)
         return  data_list
+
+
+def load_data_from_directory1(directory_path,needsorted):
+    """Load text files in numerical order and convert data to tensors."""
+    data_list = []
+    files = [f for f in os.listdir(directory_path) if f.endswith(".txt")]
+    if needsorted == True:
+        sorted_files = sort_files_numerically(files)
+        for filename in sorted_files:
+            file_path = os.path.join(directory_path, filename)
+            data = read_data1(file_path)
+            #tensor = torch.tensor(data, dtype=torch.float32)
+            data_list.append(data)
+        return data_list
+    else:
+        for filename in files:
+            file_path = os.path.join(directory_path,filename)
+            data = read_data1(file_path)
+            #tensor = torch.tensor(data, dtype=torch.float32)
+            data_list.append(data)
+        return  data_list
+
 
 def split_data(data_tensors):
     """Split the data into training and testing datasets."""

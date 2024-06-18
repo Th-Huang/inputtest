@@ -5,7 +5,7 @@ from torch_geometric.data import DataLoader
 
 from model import FEMtest
 import config
-from lib.dataset.FEMdata import load_data_from_directory, split_data, repeat_tensor_elements, CustomDataset
+from lib.dataset.FEMdata import load_data_from_directory, split_data, repeat_tensor_elements, CustomDataset, load_data_from_directory1
 
 def executeEpoch(model, loader, loss_function, opt, sched, e, sw, mode='train', lE=None):
     assert mode == 'train' or mode =='val', 'mode should be train or val'
@@ -43,7 +43,7 @@ def train(args):
     input_data = load_data_from_directory(config.INPUT_PATH,needsorted=True)
     coord_data = load_data_from_directory(config.COORD_PATH,needsorted=False)
     output_data = load_data_from_directory(config.OUTPUT_PATH,needsorted=True)
-    new_coord_data = [repeat_tensor_elements(tensor, 150) for tensor in coord_data][0]
+    new_coord_data = [repeat_tensor_elements(tensor, 100) for tensor in coord_data][0]
     num = 0
     for i in range (len(output_data)):
         for j in range(len(output_data[i])):
